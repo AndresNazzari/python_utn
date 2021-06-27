@@ -1,0 +1,4 @@
+Se trata de una aplicacion para el control de stock de libros.
+Desde la pantalla principal se puede elegir si se quiere hacer Altas, bajas, modificaciones, o consultas.
+En el menu ABM, se puede seleccionar Alta, Baja o Modificciones.
+
