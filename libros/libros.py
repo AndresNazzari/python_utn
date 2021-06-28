@@ -156,9 +156,6 @@ def alta_bd(libro):
         + libro["genero"]
         + "')"
     )
-
-    print(sent % libro)
-    time.sleep(10)
     # me conectgo a la base de datos
     db = mysql.connector.connect(
         host=DB_HOST, user=DB_USER, passwd=DB_PASS, database=DB_NOMBRE
@@ -168,6 +165,7 @@ def alta_bd(libro):
     # inserto los valores en la base de datos
     # de acuerdo a la sentencia armada, y al libro pasado por parametro
     micursor.execute(sent, libro)
+    db.commit()
 
     # me desconecto de la base de datos
     db.close()
@@ -216,16 +214,17 @@ def baja():
 def baja_bd(codigo=0, nombre="", genero="", tabla=""):
     if codigo != 0:
         cod = existe("codigo", int(codigo), tabla)
+        if cod:
+            for x in cod:
+                print(x)
+        else:
+            print("no se encontraron resultados")
+            time.sleep(3)
     elif nombre != "":
         nom = existe("nombre", nombre, tabla)
     elif genero != "":
         gen = existe("genero", genero, tabla)
 
-    print(
-        "aqui se realizara la baja en la base de datos y se devolvera al usuario la confirmacion"
-    )
-    print("lo busca, si lo encuentra y el stock esta en 0 lo elimina")
-    time.sleep(3)
     return
 
 
@@ -345,24 +344,17 @@ def borra_db():  # elimina base de datos si existen
     time.sleep(2)
 
 
-def existe(
-    col, par, tab
-):  # verifica si un libro o genero existe y cual es el stock actual
-
+def existe(col, par, tab):  # verifica si existe
     sent = "SELECT * FROM " + tab + " WHERE " + col + " = %s"
     val = (par,)
     db = mysql.connector.connect(
         host=DB_HOST, user=DB_USER, passwd=DB_PASS, database=DB_NOMBRE
     )
-    time.sleep(5)
     micursor = db.cursor()
     micursor.execute(sent, val)
     resultado = micursor.fetchall()
-    print(resultado)
-
     db.close()
-    time.sleep(5)
-    return
+    return resultado
 
 
 menu_principal()
