@@ -1,6 +1,7 @@
 import os
 import time
 import mysql.connector
+import re
 
 # variable global creo el nbombre de la base de datos
 DB_NOMBRE = "tp1_pythoninicialutn"
@@ -111,8 +112,8 @@ def alta(cant):
             + "\n"
         )
         cont += 1
-
         libro = {}
+        patron = re.compile("^[a-zA-Z0-9 ]*$")
 
         libro["codigo"] = input("Ingrese el codigo numerico del articulo: ")
 
@@ -121,6 +122,9 @@ def alta(cant):
             libro["codigo"] = input("Ingrese el codigo numerico del articulo: ")
 
         libro["nombre"] = input("Ingrese el nombre del libro: ")
+        while patron.match(libro["nombre"]) is None:
+            print("El nombre no debe contener caracteres especiales como $%& etc.:")
+            libro["nombre"] = input("Ingrese el nombre del libro: ")
 
         libro["cantidad"] = input("Ingrese la cantidad: ")
         while libro.get("cantidad").isnumeric() == False:
@@ -132,10 +136,15 @@ def alta(cant):
             print("Debe ingresar un numero")
             libro["precio"] = input("Ingrese el precio unitario: ")
 
-        libro["genero"] = input(
-            "Ingrese el genero: "
-        )  # en un futuro este valor debera ser seleccionable de una tabla
+        libro["genero"] = input("Ingrese el genero: ")
+        while patron.match(libro["genero"]) is None:
+            print("El genero no debe contener caracteres especiales como $%& etc.:")
+            libro["genero"] = input("Ingrese el genero: ")
 
+        # en un futuro este valor debera ser seleccionable de una tabla
+
+        # deberia chequear si el codigo ingresado ya existe, de ser asi,
+        # no le permitiria ingresar otro articulo con el mismo codigo
         alta_bd(libro)
         time.sleep(1)
 
@@ -199,9 +208,10 @@ def baja():
             baja_bd(codigo, tabla="productos")
             opc = True
         elif opc == "2":
-            nombre = input("Ingrese el nombre del articulo: ")
+            # nombre = input("Ingrese el nombre del articulo: ")
+            print("Herramienta en desarrollo, aun no disponible")
             time.sleep(2)
-            baja_bd(nombre, tabla="productos")
+            # baja_bd(nombre, tabla="productos")
             opc = True
         elif opc == "3":
             return
@@ -216,28 +226,115 @@ def baja_bd(codigo=0, nombre="", genero="", tabla=""):
         cod = existe("codigo", int(codigo), tabla)
         if cod:
             for x in cod:
+                if x[3] > 0:
+                    print("No se puede eliminar el articulo dado que aun hay stock.")
+                    time.sleep(2)
+                else:
+                    print("Esta por eliminar el libro " + x[2])
+                    print(
+                        "¿Realmente desea ELIMINAR el articulo de la base de datos? (si/NO): "
+                    )
+                    resp = input()
+                    if resp.lower() == "si":
+                        baja_registro("codigo", int(codigo), tabla)
+                        print("Eliminando Registro...")
+                        time.sleep(2)
+                        print("Registro eliminado con exito de la base de datos")
+                        time.sleep(2)
+        else:
+            print("no se encontraron resultados")
+            time.sleep(2)
+    elif nombre != "":
+        nom = existe("nombre", nombre, tabla)
+        if nom:
+            for x in nom:
                 print(x)
+                time.sleep(2)
         else:
             print("no se encontraron resultados")
             time.sleep(3)
-    elif nombre != "":
-        nom = existe("nombre", nombre, tabla)
     elif genero != "":
         gen = existe("genero", genero, tabla)
+        if gen:
+            for x in gen:
+                print(x)
+                time.sleep(2)
+        else:
+            print("no se encontraron resultados")
+            time.sleep(3)
 
     return
 
 
 def modificacion():
-    print(
-        "aqui se podran realizar modificaciones en el stock, cantidades o precios, o corregir errores de tipeo en el nombre"
-    )
-    time.sleep(3)
-    return
+    opc = True
+    while opc == True:
+        os.system("cls")
+        print("\x1b[1;97;41m" + "***  Modificacion de Registro  ***" + "\x1b[0m" + "\n")
+        print("Aqui podra modificar la cantidad o precio de un articulo")
+
+        codigo = input("Ingrese el codigo del articulo que desea modificar: ")
+        while codigo.isnumeric() == False:
+            print("Debe ingresar un numero")
+            codigo = input("Ingrese el codigo del articulo: ")
+        time.sleep(2)
+
+        cod = existe("codigo", int(codigo), "productos")
+        print("1. Modificar Cantidad")
+        print("2. Modificar Precio")
+        print("3. Volver al menu anterior\n")
+        opc = input("Seleccione una opcion, debe ingresar el número de opcion: ")
+
+        if opc == "1":
+            if cod:
+                nueva_cant = input(
+                    "Ingrese la nueva cantidad para el articulo seleccionado: "
+                )
+                while nueva_cant.isnumeric() == False:
+                    print("Debe ingresar un numero")
+                    nueva_cantidad = input(
+                        "Ingrese la nueva cantidad para el articulo seleccionado: "
+                    )
+                modificacion_registro("cantidad", nueva_cant, "productos", int(codigo))
+                print("Modificando registro a la base de datos")
+                time.sleep(2)
+                print("Registro Modificado")
+                time.sleep(2)
+            else:
+                print("no se encontraron resultados")
+                time.sleep(2)
+                opc = True
+        elif opc == "2":
+            if cod:
+                nuevo_precio = input(
+                    "Ingrese el nuevo precio para el articulo seleccionado: "
+                )
+                while nuevo_precio.isnumeric() == False:
+                    print("Debe ingresar un numero")
+                    nuevo_precio = input(
+                        "Ingrese el nuevo precio para el articulo seleccionado: "
+                    )
+
+                modificacion_registro("precio", nuevo_precio, "productos", int(codigo))
+                print("Modificando registro a la base de datos")
+                time.sleep(2)
+                print("Registro Modificado")
+                time.sleep(2)
+            else:
+                print("no se encontraron resultados")
+                time.sleep(2)
+            opc = True
+        elif opc == "3":
+            return
+        else:
+            print("La opcion elegida es invalida")
+            time.sleep(2)
+            opc = True
 
 
 def menu_consultas():
     print("aqui se podran realizar consultas")
+    print("Herramienta en desarrollo, aun no disponible")
     time.sleep(3)
     return
 
@@ -355,6 +452,35 @@ def existe(col, par, tab):  # verifica si existe
     resultado = micursor.fetchall()
     db.close()
     return resultado
+
+
+def baja_registro(col, par, tab):
+    sent = "DELETE FROM " + tab + " WHERE " + col + " = %s"
+    val = (par,)
+    db = mysql.connector.connect(
+        host=DB_HOST, user=DB_USER, passwd=DB_PASS, database=DB_NOMBRE
+    )
+    micursor = db.cursor()
+    micursor.execute(sent, val)
+    db.commit()
+    db.close()
+    return
+
+
+def modificacion_registro(col, par, tab, cod):
+    sent = "UPDATE " + tab + " SET " + col + " = %s" + " WHERE codigo = %s"
+    val = (
+        par,
+        cod,
+    )
+    db = mysql.connector.connect(
+        host=DB_HOST, user=DB_USER, passwd=DB_PASS, database=DB_NOMBRE
+    )
+    micursor = db.cursor()
+    micursor.execute(sent, val)
+    db.commit()
+    db.close()
+    return
 
 
 menu_principal()
